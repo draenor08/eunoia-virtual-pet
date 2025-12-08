@@ -1,28 +1,30 @@
-import { useRive, useStateMachineInput } from '@rive-app/react-canvas';
+import { useRive } from '@rive-app/react-canvas';
+import { useEffect } from 'react';
 
 interface PetAvatarProps {
-  emotion?: 'idle' | 'happy' | 'sad';
-  isSpeaking?: boolean;
+  animation?: string; // Change from emotion/isSpeaking to animation name
 }
 
-export default function PetAvatar({ emotion = 'idle', isSpeaking = false }: PetAvatarProps) {
+export default function PetAvatar({ animation = 'idle' }: PetAvatarProps) {
   const { rive, RiveComponent } = useRive({
     src: '/animations/Euna.riv',
-    stateMachines: 'Animations',
+    animations: ['anim_idle', 'anim_happy', 'anim_sad', 'anim_breathLOOP', 'drinking'], // Names from your .riv file
     autoplay: true,
   });
 
-  // Control animation states
-  const emotionInput = useStateMachineInput(rive, 'Animations', 'emotion');
-  const speakInput = useStateMachineInput(rive, 'Animations', 'speak');
-
-  // Update animation when props change
-  if (emotionInput && emotion === 'happy') emotionInput.value = 1;
-  if (speakInput) speakInput.value = isSpeaking;
+  // THIS IS THE KEY: When animation prop changes, play that animation
+  useEffect(() => {
+    if (rive && animation) {
+      rive.play(animation);
+    }
+  }, [rive, animation]);
 
   return (
     <div className="w-64 h-64 mx-auto">
       <RiveComponent className="w-full h-full" />
+      <p className="text-sm text-gray-500 text-center mt-2">
+        Playing: {animation}
+      </p>
     </div>
   );
 }
