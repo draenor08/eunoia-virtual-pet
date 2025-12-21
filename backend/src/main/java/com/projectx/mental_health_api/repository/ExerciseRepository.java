@@ -1,11 +1,5 @@
 package com.projectx.mental_health_api.repository;
 
-
-
-// public class ExerciseRepository {
-    
-// }
-
 import com.projectx.mental_health_api.model.Exercise;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

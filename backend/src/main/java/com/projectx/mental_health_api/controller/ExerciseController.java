@@ -1,10 +1,5 @@
 package com.projectx.mental_health_api.controller;
 
-// public class ExerciseController {
-    
-// }
-
-
 import com.projectx.mental_health_api.model.Exercise;
 import com.projectx.mental_health_api.repository.ExerciseRepository;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/exercises")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ExerciseController {
 
     private final ExerciseRepository exerciseRepository;

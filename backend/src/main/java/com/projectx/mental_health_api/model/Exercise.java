@@ -1,6 +1,5 @@
 package com.projectx.mental_health_api.model;
 
-
 import jakarta.persistence.*;
 
 @Entity
@@ -11,21 +10,22 @@ public class Exercise {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Basic info
     @Column(nullable = false)
-    private String title;
+    private String title;          // e.g. "4–7–8 Breathing"
 
-    private String category;
+    private String category;       // "breathing", "grounding", "mindfulness"
 
-    private Integer duration;
+    private Integer duration;      // in minutes, e.g. 5
 
     @Column(name = "mood_type")
-    private String moodType;
+    private String moodType;       // "anxious", "low", "overwhelmed"
 
     @Column(columnDefinition = "text")
-    private String description;
+    private String description;    // short goal/summary
 
     @Column(columnDefinition = "text")
-    private String instructions;
+    private String instructions;   // step‑by‑step text, separated by new lines
 
     // Getters
     public Long getId() {
@@ -56,10 +56,7 @@ public class Exercise {
         return instructions;
     }
 
-
     // Setters
-
-
     public void setId(Long id) {
         this.id = id;
     }
