@@ -1,13 +1,13 @@
-package com.eunoia.virtualpet;
+package com.projectx.mental_health_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class VirtualPetApplication {
+public class MentalHealthApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(VirtualPetApplication.class, args);
+		SpringApplication.run(MentalHealthApiApplication.class, args);
 	}
 
 }
