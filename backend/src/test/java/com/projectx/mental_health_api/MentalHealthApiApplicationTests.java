@@ -1,10 +1,10 @@
-package com.eunoia.virtualpet;
+package com.projectx.mental_health_api;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class VirtualPetApplicationTests {
+class MentalHealthApiApplicationTests {
 
 	@Test
 	void contextLoads() {
