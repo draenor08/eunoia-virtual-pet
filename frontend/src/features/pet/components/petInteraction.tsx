@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import PetAvatar from './petAvatar'; // Make sure import path is correct
+import PetAvatar from './PetAvatar'; // Make sure import path is correct
 
 export default function PetInteraction() {
   const [currentAnimation, setCurrentAnimation] = useState('idle');
@@ -8,7 +8,7 @@ export default function PetInteraction() {
   const triggerAnimation = (animationName: string) => {
     setCurrentAnimation(animationName);
     // Optional: Reset to idle after 3 seconds
-    setTimeout(() => setCurrentAnimation('idle'), 10000);
+    setTimeout(() => setCurrentAnimation('idle'), 5000);
   };
 
   return (
