@@ -5,7 +5,10 @@ import com.projectx.mental_health_api.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Optional;
+import java.util.UUID;
 import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:5173") // allow Vite dev server
@@ -19,11 +22,16 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+    // ---------- CREATE ----------
+
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        // TODO: hash incoming password into passwordHash before saving
         User saved = userRepository.save(user);
         return ResponseEntity.status(201).body(saved);
     }
+
+    // ---------- READ ----------
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable UUID id) {
@@ -32,6 +40,8 @@ public class UserController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    // ---------- UPDATE ----------
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User updated) {
@@ -46,7 +56,6 @@ public class UserController {
                     }
 
                     existing.setFullName(updated.getFullName());
-                    existing.setFirstName(updated.getFirstName());
                     existing.setLastName(updated.getLastName());
                     existing.setPhoneNumber(updated.getPhoneNumber());
                     existing.setPreferences(updated.getPreferences());
@@ -64,6 +73,8 @@ public class UserController {
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    // ---------- DELETE ----------
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable UUID id) {
