@@ -1,27 +1,17 @@
 package com.projectx.mental_health_api.controller;
 
-// import com.projectx.mental_health_api.model.User;
-// import com.projectx.mental_health_api.repository.UserRepository;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.web.bind.annotation.*;
-
-// import org.springframework.web.bind.annotation.CrossOrigin;
 import com.projectx.mental_health_api.model.User;
 import com.projectx.mental_health_api.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Optional;
+import java.util.UUID;
+import java.util.UUID;
 
-@CrossOrigin(origins = "http://localhost:5173")   // allow Vite dev server
-
+@CrossOrigin(origins = "http://localhost:5173") // allow Vite dev server
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -32,39 +22,62 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
+    // ---------- CREATE ----------
+
     @PostMapping
     public ResponseEntity<User> createUser(@RequestBody User user) {
+        // TODO: hash incoming password into passwordHash before saving
         User saved = userRepository.save(user);
         return ResponseEntity.status(201).body(saved);
     }
 
+    // ---------- READ ----------
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@PathVariable Long id) {
+    public ResponseEntity<User> getUser(@PathVariable UUID id) {
         Optional<User> userOpt = userRepository.findById(id);
-        return userOpt.<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(404).body("User not found"));
+        return userOpt
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    // ---------- UPDATE ----------
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updated) {
+    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User updated) {
         return userRepository.findById(id)
                 .map(existing -> {
-                    existing.setFirstName(updated.getFirstName());
-                    existing.setLastName(updated.getLastName());
                     existing.setEmail(updated.getEmail());
+                    existing.setUsername(updated.getUsername());
+
+                    // Only update passwordHash if a new value is provided
+                    if (updated.getPasswordHash() != null && !updated.getPasswordHash().isBlank()) {
+                        existing.setPasswordHash(updated.getPasswordHash());
+                    }
+
+                    existing.setFullName(updated.getFullName());
+                    existing.setLastName(updated.getLastName());
                     existing.setPhoneNumber(updated.getPhoneNumber());
-                    existing.setPassword(updated.getPassword());
                     existing.setPreferences(updated.getPreferences());
                     existing.setProgress(updated.getProgress());
+                    existing.setProfilePictureUrl(updated.getProfilePictureUrl());
+                    existing.setDateOfBirth(updated.getDateOfBirth());
+                    existing.setEmailNotifications(updated.getEmailNotifications());
+                    existing.setSmsNotifications(updated.getSmsNotifications());
+                    existing.setIsActive(updated.getIsActive());
+                    existing.setIsEmailVerified(updated.getIsEmailVerified());
                     existing.setUpdates(updated.getUpdates());
-                    userRepository.save(existing);
-                    return ResponseEntity.ok("Profile updated successfully");
+
+                    User saved = userRepository.save(existing);
+                    return ResponseEntity.ok(saved);
                 })
-                .orElseGet(() -> ResponseEntity.status(404).body("User not found"));
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // ---------- DELETE ----------
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable UUID id) {
         if (!userRepository.existsById(id)) {
             return ResponseEntity.status(404).body("User not found");
         }

@@ -14,20 +14,28 @@ public class Exercise {
     @Column(nullable = false)
     private String title;          // e.g. "4–7–8 Breathing"
 
-    private String category;       // "breathing", "grounding", "mindfulness"
+    // "breathing", "grounding", "mindfulness"
+    @Column(name = "category")
+    private String category;
 
-    private Integer duration;      // in minutes, e.g. 5
+    // in minutes, e.g. 5
+    @Column(name = "duration")
+    private Integer duration;
 
+    // "anxious", "low", "overwhelmed"
     @Column(name = "mood_type")
-    private String moodType;       // "anxious", "low", "overwhelmed"
+    private String moodType;
 
+    // short goal/summary
     @Column(columnDefinition = "text")
-    private String description;    // short goal/summary
+    private String description;
 
+    // step‑by‑step text, separated by new lines
     @Column(columnDefinition = "text")
-    private String instructions;   // step‑by‑step text, separated by new lines
+    private String instructions;
 
-    // Getters
+    // ---------- Getters ----------
+
     public Long getId() {
         return id;
     }
@@ -56,7 +64,8 @@ public class Exercise {
         return instructions;
     }
 
-    // Setters
+    // ---------- Setters ----------
+
     public void setId(Long id) {
         this.id = id;
     }

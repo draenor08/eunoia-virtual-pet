@@ -37,10 +37,10 @@ public class ExerciseController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getExercise(@PathVariable Long id) {
+    public ResponseEntity<Exercise> getExercise(@PathVariable Long id) {
         return exerciseRepository.findById(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.status(404).body("Exercise not found"));
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/search")
@@ -65,7 +65,7 @@ public class ExerciseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateExercise(@PathVariable Long id, @RequestBody Exercise updated) {
+    public ResponseEntity<Exercise> updateExercise(@PathVariable Long id, @RequestBody Exercise updated) {
         return exerciseRepository.findById(id)
                 .map(existing -> {
                     existing.setTitle(updated.getTitle());
@@ -74,9 +74,9 @@ public class ExerciseController {
                     existing.setMoodType(updated.getMoodType());
                     existing.setDescription(updated.getDescription());
                     existing.setInstructions(updated.getInstructions());
-                    exerciseRepository.save(existing);
-                    return ResponseEntity.ok("Exercise updated successfully");
+                    Exercise saved = exerciseRepository.save(existing);
+                    return ResponseEntity.ok(saved);
                 })
-                .orElseGet(() -> ResponseEntity.status(404).body("Exercise not found"));
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
