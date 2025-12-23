@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import "./App.css";
 
 // Import your components
+import CopingExercises from "./CopingExercises";
 import PetInteraction from './features/pet/components/PetInteraction';
 import PetChat from './features/pet/components/PetChat';
 import MoodCheckIn from './features/mood/components/MoodCheckIn';
@@ -12,7 +13,8 @@ const USER_ID = 1; // Assuming a single user for the demo
 
 function App() {
   // Navigation State
-  const [activeTab, setActiveTab] = useState<'pet' | 'analytics' | 'profile'>('pet');
+  const [activeTab, setActiveTab] = useState<'pet' | 'analytics' | 'profile' | 'coping'>('pet');
+
 
   // User Profile State (Restored from teammate's code)
   const [firstName, setFirstName] = useState("");
@@ -86,6 +88,14 @@ function App() {
           <button onClick={() => setActiveTab('pet')} className={`text-left p-3 rounded-xl transition ${activeTab === 'pet' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>
             🐾 My Pet
           </button>
+          <button
+            onClick={() => setActiveTab('coping')}
+              className={`text-left p-3 rounded-xl transition ${
+                activeTab === 'coping' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+          🌱 Coping Exercises
+          </button>
           <button onClick={() => setActiveTab('analytics')} className={`text-left p-3 rounded-xl transition ${activeTab === 'analytics' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>
             📊 Mood Analytics
           </button>
@@ -123,6 +133,17 @@ function App() {
             <MoodChart />
           </div>
         )}
+        {/* TAB 3: COPING EXERCISES */}
+          {activeTab === 'coping' && (
+            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Coping Exercises</h2>
+                <p className="text-gray-500 mb-6">
+                  Guided exercises to help you manage stress and improve your well-being.
+                </p>
+                 <CopingExercises />
+          </div>
+          )}
+
 
         {/* TAB 3: PROFILE (RESTORED) */}
         {activeTab === 'profile' && (
