@@ -28,13 +28,26 @@ public class User {
     private String passwordHash;
 
     @Column(name = "full_name", length = 100)
+
     private String fullName;
+
+
+    @Column(name = "last_name", length = 100)
+    private String lastName;
+
+    @Column(name = "progress")
+    private Integer progress;
+
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    // Optional: a short text field to store recent updates / status
+    @Column(name = "updates", length = 500)
+    private String updates;
 
     // ---------- PREFERENCES & CONTACT ----------
 
@@ -134,9 +147,32 @@ public class User {
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Integer getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Integer progress) {
+        this.progress = progress;
+    }
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getUpdates() {
+        return updates;
+    }
+
+    public void setUpdates(String updates) {
+        this.updates = updates;
     }
 
     public String getPreferences() {
@@ -235,23 +271,23 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Object getLastName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getLastName'");
+    // If you *really* need these later, implement them properly; for now it is
+    // safer to remove or comment them out instead of throwing at runtime.
+    /*
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastName(Object lastName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setLastName'");
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public Object getProgress() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getProgress'");
+    public Integer getProgress() {
+        return progress;
     }
 
-    public void setProgress(Object progress) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setProgress'");
+    public void setProgress(Integer progress) {
+        this.progress = progress;
     }
+    */
 }

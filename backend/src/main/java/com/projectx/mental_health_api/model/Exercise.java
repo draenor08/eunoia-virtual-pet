@@ -12,7 +12,7 @@ public class Exercise {
 
     // Basic info
     @Column(nullable = false)
-    private String title;          // e.g. "4–7–8 Breathing"
+    private String title;          
 
     // "breathing", "grounding", "mindfulness"
     @Column(name = "category")
