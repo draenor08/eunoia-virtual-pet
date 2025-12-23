@@ -8,7 +8,7 @@ interface PetAvatarProps {
 export default function PetAvatar({ animation = 'idle' }: PetAvatarProps) {
   const { rive, RiveComponent } = useRive({
     src: '/animations/Euna.riv',
-    animations: ['anim_idle', 'anim_happy', 'anim_sad', 'anim_breathLOOP', 'drinking'], // Names from your .riv file
+    animations: ['anim_idle', 'anim_happy', 'anim_sad', 'breathIN-OUT', 'drinking'], // Names from your .riv file
     autoplay: true,
   });
 
