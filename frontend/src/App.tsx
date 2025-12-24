@@ -3,27 +3,28 @@ import "./App.css";
 
 // Import your components
 import CopingExercises from "./CopingExercises";
-import PetInteraction from './features/pet/components/PetInteraction';
-import PetChat from './features/pet/components/PetChat';
+import PetDashboard from './features/pet/pages/petDashboard';
 import MoodCheckIn from './features/mood/components/MoodCheckIn';
 import MoodChart from './features/mood/components/MoodChart';
+// Import the room (Ensure the path/filename matches your actual file)
+import IsometricRoom from './features/draft/IsometricRoom'; 
 
 const API_URL = "http://localhost:8080";
-const USER_ID = 1; // Assuming a single user for the demo
+const USER_ID = 1;
 
 function App() {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'pet' | 'analytics' | 'profile' | 'coping'>('pet');
-
-
-  // User Profile State (Restored from teammate's code)
+  // New State for Full Screen Focus Mode
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  
+  // User Profile State
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [preferences, setPreferences] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
-  // Load existing user data when page opens
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -42,24 +43,15 @@ function App() {
     fetchUser();
   }, []);
 
-  // Save changes to backend
   const handleSave = async () => {
     setStatus("saving");
     try {
       const res = await fetch(`${API_URL}/api/users/${USER_ID}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          preferences,
-          // Add other fields if your backend requires them
-        }),
+        body: JSON.stringify({ firstName, lastName, email, preferences }),
       });
-
       if (!res.ok) throw new Error("Failed to save");
-
       setStatus("saved");
       setTimeout(() => setStatus("idle"), 2000);
     } catch (err) {
@@ -68,148 +60,200 @@ function App() {
     }
   };
 
+  // --- 1. HANDLE FOCUS MODE (FULL SCREEN) ---
+  if (isFocusMode) {
+    return (
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* The Isometric Room Component */}
+        <IsometricRoom />
+
+        {/* Floating Back Button to return to Dashboard */}
+        <button 
+          onClick={() => setIsFocusMode(false)}
+          className="fixed top-6 left-6 z-50 bg-white/90 text-[#5c4b43] px-6 py-3 rounded-full font-bold shadow-lg border-2 border-[#efeae6] hover:bg-white hover:scale-105 transition flex items-center gap-2"
+        >
+          <span>←</span> Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  // --- 2. NORMAL DASHBOARD ---
   return (
-    <div className="app-shell max-w-[1200px] mx-auto p-8 flex gap-8">
-      {/* SIDEBAR */}
-      <aside className="w-64 flex flex-col gap-6 border-r pr-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-            {firstName ? firstName.charAt(0).toUpperCase() : "U"}
-          </div>
-          <div>
-            <h2 className="font-bold text-gray-800">
+    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8">
+      
+      {/* Main Floating Shell */}
+      <div className="w-full max-w-[1400px] min-h-[85vh] bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(92,75,67,0.1)] border-4 border-[#efeae6] flex flex-col md:flex-row overflow-hidden">
+        
+        {/* SIDEBAR NAVIGATION */}
+        <aside className="w-full md:w-72 bg-[#fdfbf9] border-r-4 border-[#efeae6] flex flex-col p-6 gap-6">
+          
+          {/* User Profile Snippet */}
+          <div className="flex items-center gap-4 p-2">
+            <div className="w-14 h-14 bg-[#e6a394] rounded-full flex items-center justify-center text-white font-extrabold text-xl shadow-sm">
+              {firstName ? firstName.charAt(0).toUpperCase() : "U"}
+            </div>
+            <div>
+              <h2 className="font-bold text-[#5c4b43] text-lg">
                 {firstName ? firstName : "User"}
-            </h2>
-            <p className="text-xs text-gray-500">Online</p>
-          </div>
-        </div>
-        
-        <nav className="flex flex-col gap-2">
-          <button onClick={() => setActiveTab('pet')} className={`text-left p-3 rounded-xl transition ${activeTab === 'pet' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>
-            🐾 My Pet
-          </button>
-          <button
-            onClick={() => setActiveTab('coping')}
-              className={`text-left p-3 rounded-xl transition ${
-                activeTab === 'coping' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'
-                }`}
-              >
-          🌱 Coping Exercises
-          </button>
-          <button onClick={() => setActiveTab('analytics')} className={`text-left p-3 rounded-xl transition ${activeTab === 'analytics' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>
-            📊 Mood Analytics
-          </button>
-          <button onClick={() => setActiveTab('profile')} className={`text-left p-3 rounded-xl transition ${activeTab === 'profile' ? 'bg-purple-50 text-purple-700 font-bold' : 'text-gray-600 hover:bg-gray-50'}`}>
-            👤 Profile Settings
-          </button>
-        </nav>
-
-        {/* The Magic Button lives here for easy access */}
-        <MoodCheckIn />
-      </aside>
-
-      {/* MAIN CONTENT Area */}
-      <main className="flex-1">
-        
-        {/* TAB 1: PET */}
-        {activeTab === 'pet' && (
-          <div className="grid grid-cols-2 gap-6 h-full">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-400 uppercase text-xs tracking-wider mb-4">Companion</h3>
-              <PetInteraction />
-            </div>
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <h3 className="font-bold text-gray-400 uppercase text-xs tracking-wider mb-4">Chat</h3>
-              <PetChat />
+              </h2>
+              <p className="text-xs text-[#a3b899] font-bold uppercase tracking-wider">Online</p>
             </div>
           </div>
-        )}
 
-        {/* TAB 2: ANALYTICS */}
-        {activeTab === 'analytics' && (
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Emotional Trends</h2>
-            <p className="text-gray-500 mb-8">Real-time analysis based on your chat history.</p>
-            <MoodChart />
-          </div>
-        )}
-        {/* TAB 3: COPING EXERCISES */}
-          {activeTab === 'coping' && (
-            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Coping Exercises</h2>
-                <p className="text-gray-500 mb-6">
-                  Guided exercises to help you manage stress and improve your well-being.
-                </p>
-                 <CopingExercises />
-          </div>
-          )}
+          <hr className="border-[#efeae6]" />
 
-
-        {/* TAB 3: PROFILE (RESTORED) */}
-        {activeTab === 'profile' && (
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 max-w-2xl">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Edit Profile</h2>
+          {/* Nav Buttons */}
+          <nav className="flex flex-col gap-3 flex-1">
+            <NavButton 
+              active={activeTab === 'pet'} 
+              onClick={() => setActiveTab('pet')} 
+              icon="🐾" 
+              label="My Room" 
+            />
             
-            <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-gray-600">First Name</label>
-                        <input 
-                            className="p-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 transition"
-                            value={firstName} 
-                            onChange={(e) => setFirstName(e.target.value)} 
-                            placeholder="Your name"
-                        />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-semibold text-gray-600">Last Name</label>
-                        <input 
-                            className="p-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 transition"
-                            value={lastName} 
-                            onChange={(e) => setLastName(e.target.value)} 
-                            placeholder="Your last name"
-                        />
-                    </div>
-                </div>
+            {/* --- NEW BUTTON FOR FOCUS MODE --- */}
+            <button 
+              onClick={() => setIsFocusMode(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 font-bold text-[#8c7e76] hover:bg-indigo-50 hover:text-indigo-600 group"
+            >
+              <span className="text-xl group-hover:scale-110 transition">🎓</span>
+              Focus Room
+            </button>
+            {/* --------------------------------- */}
 
-                <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold text-gray-600">Email</label>
-                    <input 
-                        className="p-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 transition"
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
-                        placeholder="name@example.com"
-                    />
-                </div>
+            <NavButton 
+              active={activeTab === 'coping'} 
+              onClick={() => setActiveTab('coping')} 
+              icon="🌱" 
+              label="Coping" 
+            />
+            <NavButton 
+              active={activeTab === 'analytics'} 
+              onClick={() => setActiveTab('analytics')} 
+              icon="📊" 
+              label="Mood Trends" 
+            />
+            <NavButton 
+              active={activeTab === 'profile'} 
+              onClick={() => setActiveTab('profile')} 
+              icon="👤" 
+              label="Settings" 
+            />
+          </nav>
 
-                <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold text-gray-600">Mental Health Preferences</label>
-                    <textarea 
-                        className="p-3 border rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-200 transition min-h-[100px]"
-                        value={preferences} 
-                        onChange={(e) => setPreferences(e.target.value)} 
-                        placeholder="Tell us what support works best for you..."
-                    />
-                </div>
-
-                <div className="flex items-center gap-4 pt-4 border-t">
-                    <button 
-                        onClick={handleSave} 
-                        disabled={status === 'saving'}
-                        className="bg-purple-600 text-white px-8 py-3 rounded-full font-bold hover:bg-purple-700 transition disabled:opacity-50"
-                    >
-                        {status === 'saving' ? 'Saving...' : 'Save Changes'}
-                    </button>
-                    
-                    {status === 'saved' && <span className="text-green-600 font-medium">Changes saved successfully!</span>}
-                    {status === 'error' && <span className="text-red-500 font-medium">Failed to save. Check backend.</span>}
-                </div>
-            </div>
+          {/* Check In Button - Pushed to bottom */}
+          <div className="mt-auto">
+             <MoodCheckIn />
           </div>
-        )}
-      </main>
+        </aside>
+
+        {/* MAIN CONTENT AREA */}
+        <main className="flex-1 bg-[#fff] overflow-y-auto h-[85vh] md:h-auto custom-scrollbar relative">
+           {/* Decorative Top Blur */}
+           <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
+
+           <div className="p-2 md:p-8">
+            
+            {/* TAB CONTENT SWITCHER */}
+            {activeTab === 'pet' && <PetDashboard />}
+            
+            {activeTab === 'coping' && (
+               <div className="max-w-4xl mx-auto pt-8">
+                 <h2 className="text-3xl font-extrabold text-[#5c4b43] mb-6">Breathing & Grounding</h2>
+                 <CopingExercises />
+               </div>
+            )}
+
+            {activeTab === 'analytics' && (
+              <div className="max-w-4xl mx-auto pt-8">
+                <div className="bg-[#fdfbf9] p-8 rounded-[2rem] border-4 border-[#efeae6]">
+                  <h2 className="text-2xl font-bold text-[#5c4b43] mb-2">Emotional Trends</h2>
+                  <p className="text-[#8c7e76] mb-8">How you've been feeling lately.</p>
+                  <MoodChart />
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'profile' && (
+              <div className="max-w-2xl mx-auto pt-8">
+                <div className="bg-[#fdfbf9] p-8 rounded-[2rem] border-4 border-[#efeae6]">
+                  <h2 className="text-2xl font-bold text-[#5c4b43] mb-6">Profile Settings</h2>
+                  <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                          <InputField label="First Name" value={firstName} onChange={setFirstName} />
+                          <InputField label="Last Name" value={lastName} onChange={setLastName} />
+                      </div>
+                      <InputField label="Email" value={email} onChange={setEmail} />
+                      
+                      <div className="flex flex-col gap-2">
+                          <label className="text-sm font-bold text-[#5c4b43] ml-2">Preferences</label>
+                          <textarea 
+                              className="p-4 rounded-2xl bg-white border-2 border-[#efeae6] focus:border-[#e6a394] focus:outline-none transition min-h-[120px] resize-none text-[#5c4b43]"
+                              value={preferences} 
+                              onChange={(e) => setPreferences(e.target.value)} 
+                          />
+                      </div>
+
+                      <div className="pt-4 flex items-center gap-4">
+                          <button 
+                              onClick={handleSave} 
+                              disabled={status === 'saving'}
+                              className="bg-[#5c4b43] text-white px-8 py-3 rounded-full font-bold hover:bg-[#4a3b36] transition shadow-lg disabled:opacity-50"
+                          >
+                              {status === 'saving' ? 'Saving...' : 'Save Changes'}
+                          </button>
+                          {status === 'saved' && <span className="text-[#a3b899] font-bold">Saved!</span>}
+                      </div>
+                  </div>
+                </div>
+              </div>
+            )}
+           </div>
+        </main>
+      </div>
     </div>
   );
 }
+
+// Helper Components with Proper Types
+
+interface NavButtonProps {
+  active: boolean;
+  onClick: () => void;
+  icon: string;
+  label: string;
+}
+
+const NavButton = ({ active, onClick, icon, label }: NavButtonProps) => (
+  <button 
+    onClick={onClick} 
+    className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 font-bold ${
+      active 
+        ? 'bg-[#e6a394] text-white shadow-md' 
+        : 'text-[#8c7e76] hover:bg-[#f3f4f6]'
+    }`}
+  >
+    <span className="text-xl">{icon}</span>
+    {label}
+  </button>
+);
+
+interface InputFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+const InputField = ({ label, value, onChange }: InputFieldProps) => (
+    <div className="flex flex-col gap-2">
+      <label className="text-sm font-bold text-[#5c4b43] ml-2">{label}</label>
+      <input 
+        className="p-3 px-4 rounded-xl bg-white border-2 border-[#efeae6] focus:border-[#e6a394] focus:outline-none transition text-[#5c4b43]"
+        value={value} 
+        onChange={(e) => onChange(e.target.value)} 
+      />
+    </div>
+);
 
 export default App;
