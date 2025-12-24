@@ -1,23 +1,33 @@
 package com.projectx.mental_health_api.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
 public class User {
 
     // ---------- PRIMARY KEY ----------
-
     @Id
     @GeneratedValue
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    // ---------- CORE FIELDS ----------
+    @Column(columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)  // <--- 🟢 ADD THIS LINE
+    private String preferences;
 
+    // ---------- CORE FIELDS ----------
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
@@ -28,16 +38,13 @@ public class User {
     private String passwordHash;
 
     @Column(name = "full_name", length = 100)
-
     private String fullName;
-
 
     @Column(name = "last_name", length = 100)
     private String lastName;
 
     @Column(name = "progress")
     private Integer progress;
-
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
@@ -50,11 +57,7 @@ public class User {
     private String updates;
 
     // ---------- PREFERENCES & CONTACT ----------
-
     // JSONB in DB; keep as String in Java
-    @Column(columnDefinition = "jsonb")
-    private String preferences;
-
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
@@ -65,7 +68,6 @@ public class User {
     private Boolean smsNotifications;
 
     // ---------- ACCOUNT STATUS ----------
-
     @Column(name = "is_active")
     private Boolean isActive;
 
@@ -76,7 +78,6 @@ public class User {
     private String verificationToken;
 
     // ---------- SESSION / LOGIN ----------
-
     @Column(name = "refresh_token", length = 512)
     private String refreshToken;
 
@@ -87,15 +88,16 @@ public class User {
     private Integer loginCount;
 
     // ---------- AUDIT ----------
-
     @Column(name = "created_at")
     private OffsetDateTime createdAt;
 
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    // ---------- GETTERS & SETTERS ----------
+    @Column(name = "first_name", length = 100)
+    private String firstName;
 
+    // ---------- GETTERS & SETTERS ----------
     public UUID getId() {
         return id;
     }
@@ -147,6 +149,7 @@ public class User {
     public LocalDate getDateOfBirth() {
         return dateOfBirth;
     }
+
     public String getLastName() {
         return lastName;
     }
@@ -271,23 +274,11 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    // If you *really* need these later, implement them properly; for now it is
-    // safer to remove or comment them out instead of throwing at runtime.
-    /*
-    public String getLastName() {
-        return lastName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
+    public String getFirstName() {
+        return firstName;
     }
-
-    public Integer getProgress() {
-        return progress;
-    }
-
-    public void setProgress(Integer progress) {
-        this.progress = progress;
-    }
-    */
 }

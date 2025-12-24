@@ -1,53 +1,84 @@
-import { useState } from 'react';
-import PetAvatar from './PetAvatar';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import PetAvatar from './petAvatar'; 
 
-export default function PetInteraction() {
-  const [currentAnimation, setCurrentAnimation] = useState('idle');
+interface PetInteractionProps {
+  forcedMood?: string; 
+  currentAnimation?: string; 
+  onManualTrigger?: Dispatch<SetStateAction<string>>;
+}
+
+export default function PetInteraction({ 
+  forcedMood, 
+  currentAnimation, 
+  onManualTrigger 
+}: PetInteractionProps) {
+  
+  const [localAnimation, setLocalAnimation] = useState('idle');
+  const activeAnimation = currentAnimation ?? localAnimation;
 
   const triggerAnimation = (animationName: string) => {
-    setCurrentAnimation(animationName);
-    // Optional: Reset to idle after 5 seconds
-    setTimeout(() => setCurrentAnimation('idle'), 5000);
+    // 1. Update state (Parent or Local)
+    if (onManualTrigger) {
+      onManualTrigger(animationName);
+    } else {
+      setLocalAnimation(animationName);
+    }
+
+    // 2. Reset logic: "idle" is the baseline, don't reset if we are already there.
+    //    Also, 'breathIN-OUT' might be a loop, so maybe don't auto-reset that one? 
+    //    For now, we reset "actions" like wave or reactions after 5s.
+    if (animationName !== 'idle' && animationName !== 'breathIN-OUT') {
+      setTimeout(() => {
+        if (onManualTrigger) onManualTrigger('idle');
+        else setLocalAnimation('idle');
+      }, 5000);
+    }
   };
 
+  useEffect(() => {
+    if (!forcedMood) return;
+
+    // UPDATED: Using exact names from your console log
+    switch (forcedMood) {
+      case 'HAPPY':
+      case 'EXCITED':
+        triggerAnimation('happy'); // Was 'anim_happy'
+        break;
+      case 'SAD':
+      case 'ANXIOUS':
+        triggerAnimation('sad');   // Was 'anim_sad'
+        break;
+      case 'ANGRY':
+        triggerAnimation('angry');
+        break;
+      case 'NEUTRAL':
+      default:
+        triggerAnimation('idle');  // Was 'anim_idle'
+        break;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forcedMood]); 
+
   return (
-    // Wrapper is transparent now, filling the "Room" container
     <div className="w-full h-full flex flex-col items-center justify-between">
-      
-      {/* Avatar Container - Flexible height to fill the center space */}
       <div className="flex-1 flex items-center justify-center w-full min-h-[300px]">
-        {/* Pass animation name to PetAvatar */}
-        <PetAvatar animation={currentAnimation} />
+        <PetAvatar animation={activeAnimation} />
       </div>
       
-      {/* Interaction "Toys" - Styled as soft, clickable 3D pills */}
       <div className="flex flex-wrap justify-center gap-3 mt-6 w-full max-w-lg">
+        {/* UPDATED: Using exact names from your console log */}
         <button 
           onClick={() => triggerAnimation('breathIN-OUT')} 
-          className="bg-[#dbe7e4] text-[#2f3e46] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#cadbd7] flex items-center gap-2"
+          className="bg-[#dbe7e4] text-[#2f3e46] px-5 py-3 rounded-full font-bold text-sm hover:bg-[#cadbd7] transition"
         >
           💨 Breathe
         </button>
         
         <button 
           onClick={() => triggerAnimation('wave')} 
-          className="bg-[#e0f2fe] text-[#0369a1] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#bae6fd] flex items-center gap-2"
+          className="bg-[#dbe7e4] text-[#2f3e46] px-5 py-3 rounded-full font-bold text-sm hover:bg-[#cadbd7] transition"
         >
           👋 Wave
-        </button>
-        
-        <button 
-          onClick={() => triggerAnimation('happy')} 
-          className="bg-[#fef9c3] text-[#a16207] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#fde047] flex items-center gap-2"
-        >
-          😄 Praise
-        </button>
-        
-        <button 
-          onClick={() => triggerAnimation('sad')} 
-          className="bg-[#f4f4f5] text-[#52525b] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#e4e4e7] flex items-center gap-2"
-        >
-          😢 Comfort
         </button>
       </div>
     </div>

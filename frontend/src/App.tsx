@@ -10,7 +10,7 @@ import MoodChart from './features/mood/components/MoodChart';
 import IsometricRoom from './features/draft/IsometricRoom'; 
 
 const API_URL = "http://localhost:8080";
-const USER_ID = 1;
+const USER_ID = "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3";
 
 function App() {
   // Navigation State
@@ -155,9 +155,6 @@ function App() {
 
            <div className="p-2 md:p-8">
             
-            {/* TAB CONTENT SWITCHER */}
-            {activeTab === 'pet' && <PetDashboard />}
-            
             {activeTab === 'coping' && (
                <div className="max-w-4xl mx-auto pt-8">
                  <h2 className="text-3xl font-extrabold text-[#5c4b43] mb-6">Breathing & Grounding</h2>
@@ -173,6 +170,13 @@ function App() {
                   <MoodChart />
                 </div>
               </div>
+            )}
+            
+            {activeTab === 'pet' && (
+                <PetDashboard 
+                // Logic: When chat says "Breathe", switch this tab variable
+                  onNavigateToCoping={() => setActiveTab('coping')} 
+                  />
             )}
 
             {activeTab === 'profile' && (
