@@ -1,45 +1,53 @@
 import { useState } from 'react';
-import PetAvatar from './PetAvatar'; // Make sure import path is correct
+import PetAvatar from './PetAvatar';
 
 export default function PetInteraction() {
   const [currentAnimation, setCurrentAnimation] = useState('idle');
 
-  // These now just set the animation name, PetAvatar will handle playing it
   const triggerAnimation = (animationName: string) => {
     setCurrentAnimation(animationName);
-    // Optional: Reset to idle after 3 seconds
+    // Optional: Reset to idle after 5 seconds
     setTimeout(() => setCurrentAnimation('idle'), 5000);
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 shadow-xl">
-      {/* Pass animation name to PetAvatar */}
-      <PetAvatar animation={currentAnimation} />
+    // Wrapper is transparent now, filling the "Room" container
+    <div className="w-full h-full flex flex-col items-center justify-between">
       
-      <div className="flex flex-wrap justify-center gap-4 mt-6">
+      {/* Avatar Container - Flexible height to fill the center space */}
+      <div className="flex-1 flex items-center justify-center w-full min-h-[300px]">
+        {/* Pass animation name to PetAvatar */}
+        <PetAvatar animation={currentAnimation} />
+      </div>
+      
+      {/* Interaction "Toys" - Styled as soft, clickable 3D pills */}
+      <div className="flex flex-wrap justify-center gap-3 mt-6 w-full max-w-lg">
         <button 
           onClick={() => triggerAnimation('breathIN-OUT')} 
-          className="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition"
+          className="bg-[#dbe7e4] text-[#2f3e46] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#cadbd7] flex items-center gap-2"
         >
-          💨 Breathing Exercise
+          💨 Breathe
         </button>
+        
         <button 
-          onClick={() => triggerAnimation('wave')}  // Changed from 'water'
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition"
+          onClick={() => triggerAnimation('wave')} 
+          className="bg-[#e0f2fe] text-[#0369a1] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#bae6fd] flex items-center gap-2"
         >
-          💧 wave animation
+          👋 Wave
         </button>
+        
         <button 
           onClick={() => triggerAnimation('happy')} 
-          className="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-yellow-600 transition"
+          className="bg-[#fef9c3] text-[#a16207] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#fde047] flex items-center gap-2"
         >
-          😄 Happy Reaction
+          😄 Praise
         </button>
+        
         <button 
           onClick={() => triggerAnimation('sad')} 
-          className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition"
+          className="bg-[#f4f4f5] text-[#52525b] px-5 py-3 rounded-full font-bold text-sm shadow-[0_4px_0_rgb(0,0,0,0.1)] active:shadow-none active:translate-y-[4px] transition-all hover:bg-[#e4e4e7] flex items-center gap-2"
         >
-          😢 Sad Reaction
+          😢 Comfort
         </button>
       </div>
     </div>

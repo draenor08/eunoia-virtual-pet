@@ -1,18 +1,28 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function MoodChart() {
-  const [data, setData] = useState([]);
+// Define the shape of the data coming from your Java Backend
+interface MoodEntry {
+  timestamp: string;
+  overallSentiment: number;
+}
 
-  // Fetch data every 5 seconds to keep it "live" for the demo
+interface ChartData {
+  time: string;
+  score: number;
+}
+
+export default function MoodChart() {
+  const [data, setData] = useState<ChartData[]>([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetch('http://localhost:8080/api/mood/history');
-        const history = await res.json();
+        const history: MoodEntry[] = await res.json();
         
         // Format for Recharts
-        const formatted = history.map((entry: any) => ({
+        const formatted = history.map((entry) => ({
           time: new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           score: entry.overallSentiment
         })).reverse(); // Show oldest to newest
@@ -34,7 +44,9 @@ export default function MoodChart() {
         <LineChart data={data}>
           <XAxis dataKey="time" stroke="#888" fontSize={12} />
           <YAxis domain={[-1, 1]} stroke="#888" fontSize={12} />
-          <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+          <Tooltip 
+            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} 
+          />
           <Line 
             type="monotone" 
             dataKey="score" 

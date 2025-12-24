@@ -1,8 +1,10 @@
-package com.eunoia.virtualpet.repository;
+package com.projectx.mental_health_api.eunoia.virtualpet.repository;
 
-import com.eunoia.virtualpet.model.ChatMessage;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.projectx.mental_health_api.eunoia.virtualpet.model.ChatMessage;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
     // Correctly fetches the last 20 raw messages

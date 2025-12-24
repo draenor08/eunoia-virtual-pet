@@ -6,8 +6,8 @@ type Exercise = {
   id: number;
   title: string;
   category: ExerciseCategory | string;
-  duration: string;          // minutes as string for display/filter
-  difficulty: string;        // will be empty if backend doesn’t send it
+  duration: string;
+  difficulty: string;
   moodType: string;
   goal: string;
   steps: string[];
@@ -16,31 +16,23 @@ type Exercise = {
 const API_URL = "http://localhost:8080";
 
 export default function CopingExercises() {
-  console.log("CopingExercises mounted");
-
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedCategory, setSelectedCategory] =
-    useState<ExerciseCategory | "all">("all");
-  const [selectedDuration, setSelectedDuration] =
-    useState<"all" | "short" | "medium" | "long">("all");
-  const [selectedMood, setSelectedMood] =
-    useState<"all" | "anxious" | "low" | "overwhelmed">("all");
+  const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | "all">("all");
+  const [selectedDuration, setSelectedDuration] = useState<"all" | "short" | "medium" | "long">("all");
+  const [selectedMood, setSelectedMood] = useState<"all" | "anxious" | "low" | "overwhelmed">("all");
   const [query, setQuery] = useState("");
 
-  // load exercises once
+  // Load exercises
   useEffect(() => {
     const loadExercises = async () => {
       try {
         const res = await fetch(`${API_URL}/api/exercises`);
-
         if (!res.ok) throw new Error("Failed to load exercises");
 
         const data = await res.json();
-        console.log("Loaded exercises:", data);
-
         const mapped: Exercise[] = data.map((ex: any) => ({
           id: ex.id,
           title: ex.title ?? "",
@@ -65,89 +57,57 @@ export default function CopingExercises() {
         setLoading(false);
       }
     };
-
     loadExercises();
   }, []);
 
-  // apply filters
+  // Filter Logic
   const filtered = exercises.filter((ex) => {
     const categoryLower = (ex.category || "").toString().toLowerCase();
-    const matchesCategory =
-      selectedCategory === "all" || categoryLower === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || categoryLower === selectedCategory;
 
     const durationLower = (ex.duration || "").toLowerCase();
     const matchesDuration =
       selectedDuration === "all" ||
-      (selectedDuration === "short" &&
-        (durationLower.includes("1") || durationLower.includes("3"))) ||
-      (selectedDuration === "medium" &&
-        (durationLower.includes("5") || durationLower.includes("8"))) ||
-      (selectedDuration === "long" &&
-        (durationLower.includes("10") || durationLower.includes("15")));
+      (selectedDuration === "short" && (durationLower.includes("1") || durationLower.includes("3"))) ||
+      (selectedDuration === "medium" && (durationLower.includes("5") || durationLower.includes("8"))) ||
+      (selectedDuration === "long" && (durationLower.includes("10") || durationLower.includes("15")));
 
     const moodLower = (ex.moodType || "").toLowerCase();
-    const matchesMood =
-      selectedMood === "all" || moodLower.includes(selectedMood);
+    const matchesMood = selectedMood === "all" || moodLower.includes(selectedMood);
 
     const q = query.toLowerCase();
-    const matchesQuery =
-      !q ||
-      ex.title.toLowerCase().includes(q) ||
-      ex.goal.toLowerCase().includes(q);
+    const matchesQuery = !q || ex.title.toLowerCase().includes(q) || ex.goal.toLowerCase().includes(q);
 
     return matchesCategory && matchesDuration && matchesMood && matchesQuery;
   });
 
-  console.log("Filtered exercises:", filtered);
+  if (loading) return <div className="p-8 text-center text-[#8c7e76]">Loading warm fuzzies...</div>;
+  if (error) return <div className="p-8 text-center text-[#e6a394] font-bold">{error}</div>;
 
-  // loading state
-  if (loading) {
-    return (
-      <main className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-slate-950 text-slate-200">
-        <p>Loading exercises…</p>
-      </main>
-    );
-  }
-
-  // error state
-  if (error) {
-    return (
-      <main className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-slate-950 text-red-300">
-        <p>{error}</p>
-      </main>
-    );
-  }
-
-  // main UI
   return (
-    <main className="min-h-[calc(100vh-80px)] bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-50 px-4 py-8">
-      <section className="mx-auto max-w-5xl rounded-3xl bg-slate-900/90 border border-slate-800 px-6 py-6 md:px-8 md:py-8 shadow-2xl">
-        {/* Header */}
-        <header className="mb-6 space-y-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-sky-400/80">
-            Coping tools
-          </p>
-          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
-                Find an exercise for how you feel
-              </h1>
-              <p className="text-sm text-slate-400 max-w-xl">
-                Choose a short guided practice to help you calm down, ground
-                yourself, or reset your thoughts. You can filter by mood, time,
-                or type.
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-2 rounded-full bg-slate-800/80 px-3 py-1 text-[11px] text-slate-300">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              {filtered.length} exercises available
-            </span>
-          </div>
-        </header>
+    <div className="space-y-6">
+      
+      {/* Search & Filter Bar */}
+      <div className="bg-[#fdfbf9] p-6 rounded-[2rem] border-4 border-[#efeae6]">
+        
+        {/* Top Row: Search */}
+        <div className="mb-6">
+           <div className="relative">
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search for calm..."
+                className="w-full rounded-full bg-white border-2 border-[#efeae6] px-6 py-3 text-sm text-[#5c4b43] placeholder-[#bcaaa4] focus:outline-none focus:border-[#e6a394] transition-colors"
+              />
+              <span className="absolute right-4 top-3 text-lg">🔍</span>
+           </div>
+        </div>
 
-        {/* Filters row */}
-        <div className="mb-5 flex flex-wrap gap-3 items-center">
-          {/* Category filter */}
+        {/* Filters Grid */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+          
+          {/* Category Pills */}
           <div className="flex flex-wrap gap-2">
             {[
               { id: "all", label: "All" },
@@ -158,10 +118,10 @@ export default function CopingExercises() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id as any)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                className={`rounded-full px-4 py-2 text-sm font-bold transition-all duration-200 ${
                   selectedCategory === cat.id
-                    ? "bg-sky-500 text-white shadow-sm"
-                    : "bg-slate-800 text-slate-200 hover:bg-slate-700"
+                    ? "bg-[#e6a394] text-white shadow-md transform scale-105"
+                    : "bg-white text-[#8c7e76] border-2 border-[#efeae6] hover:border-[#d6ccc8]"
                 }`}
               >
                 {cat.label}
@@ -169,102 +129,111 @@ export default function CopingExercises() {
             ))}
           </div>
 
-          {/* Duration select */}
-          <select
-            value={selectedDuration}
-            onChange={(e) =>
-              setSelectedDuration(e.target.value as typeof selectedDuration)
-            }
-            className="rounded-full bg-slate-900 border border-slate-700 px-3 py-1 text-xs text-slate-200"
-          >
-            <option value="all">All durations</option>
-            <option value="short">Short (1–3 min)</option>
-            <option value="medium">Medium (5–8 min)</option>
-            <option value="long">Long (10+ min)</option>
-          </select>
-
-          {/* Mood select */}
-          <select
-            value={selectedMood}
-            onChange={(e) =>
-              setSelectedMood(e.target.value as typeof selectedMood)
-            }
-            className="rounded-full bg-slate-900 border border-slate-700 px-3 py-1 text-xs text-slate-200"
-          >
-            <option value="all">All moods</option>
-            <option value="anxious">Anxious / stressed</option>
-            <option value="low">Low energy / low mood</option>
-            <option value="overwhelmed">Overwhelmed</option>
-          </select>
-
-          {/* Search box */}
-          <div className="flex-1 min-w-[160px]">
-            <div className="relative">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name or goal..."
-                className="w-full rounded-full bg-slate-900 border border-slate-700 px-8 py-1.5 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-              />
-              <span className="pointer-events-none absolute left-3 top-1.5 text-slate-500 text-xs">
-                🔍
-              </span>
-            </div>
+          {/* Dropdowns */}
+          <div className="flex gap-2">
+            <SelectFilter 
+                value={selectedDuration} 
+                onChange={(e:any) => setSelectedDuration(e.target.value)}
+                options={[
+                    {val: "all", label: "⏱️ Any Time"},
+                    {val: "short", label: "⚡ Short"},
+                    {val: "medium", label: "🍵 Medium"},
+                    {val: "long", label: "🌙 Long"},
+                ]}
+            />
+            <SelectFilter 
+                value={selectedMood} 
+                onChange={(e:any) => setSelectedMood(e.target.value)}
+                options={[
+                    {val: "all", label: "😊 Any Mood"},
+                    {val: "anxious", label: "😰 Anxious"},
+                    {val: "low", label: "🌧️ Low"},
+                    {val: "overwhelmed", label: "🤯 Overwhelmed"},
+                ]}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Empty state or cards */}
-        {filtered.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-slate-700 bg-slate-950/40 px-4 py-6 text-sm text-slate-400">
-            <p className="font-medium text-slate-200 mb-1">
-              No exercises match your filters.
-            </p>
-            <p>
-              Try switching to a different mood, relaxing the duration, or
-              clearing the search box.
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {filtered.map((exercise) => (
-              <article
-                key={exercise.id}
-                className="flex h-full flex-col rounded-2xl bg-slate-950/80 border border-slate-800 px-4 py-4 hover:border-sky-500/70 hover:bg-slate-900/90 transition"
-              >
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <h2 className="text-base font-semibold">
-                    {exercise.title}
-                  </h2>
-                  <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
-                    {exercise.duration}
-                  </span>
+      {/* Results Grid */}
+      {filtered.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-[2rem] border-4 border-[#efeae6] border-dashed">
+          <p className="text-[#8c7e76] font-bold">No exercises match specific filters.</p>
+          <p className="text-sm text-[#bcaaa4]">Try selecting "All" to see everything.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          {filtered.map((exercise) => (
+            <div
+              key={exercise.id}
+              className="bg-white p-6 rounded-[2.5rem] border-4 border-[#efeae6] hover:border-[#e6a394] transition-colors shadow-sm flex flex-col h-full"
+            >
+              {/* Card Header */}
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-xl font-extrabold text-[#5c4b43]">{exercise.title}</h3>
+                    <span className="text-xs font-bold text-[#a3b899] uppercase tracking-wide bg-[#f4f7f2] px-2 py-1 rounded-lg mt-1 inline-block">
+                        {exercise.category}
+                    </span>
                 </div>
+                <div className="flex flex-col items-end gap-1">
+                    <span className="bg-[#fff0ed] text-[#e6a394] text-xs font-bold px-3 py-1 rounded-full border border-[#ffe0db]">
+                    {exercise.duration}
+                    </span>
+                </div>
+              </div>
 
-                <p className="mb-2 text-xs text-slate-400">
-                  {exercise.goal}
-                </p>
+              <p className="text-sm text-[#8c7e76] mb-6 italic">
+                "{exercise.goal}"
+              </p>
 
-                <ul className="mb-3 space-y-1.5 text-xs text-slate-100">
+              {/* Steps List */}
+              <div className="bg-[#fdfbf9] rounded-2xl p-5 mb-4 flex-1">
+                <ul className="space-y-3">
                   {exercise.steps.map((step, index) => (
-                    <li key={index} className="flex gap-2 items-start">
-                      <span className="mt-0.5 flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-slate-800 text-[10px]">
+                    <li key={index} className="flex gap-3 text-sm text-[#5c4b43]">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-[#e6a394] text-white flex items-center justify-center font-bold text-xs mt-0.5">
                         {index + 1}
                       </span>
-                      <span>{step}</span>
+                      <span className="leading-relaxed">{step}</span>
                     </li>
                   ))}
                 </ul>
+              </div>
 
-                <div className="mt-auto pt-2 text-[10px] text-slate-500 flex items-center justify-between">
-                  <span>{exercise.moodType}</span>
-                  <span>{exercise.difficulty}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
+              {/* Footer Tags */}
+              <div className="flex gap-2 mt-auto pt-2">
+                 {exercise.moodType && (
+                    <span className="text-xs font-bold text-[#8c7e76] bg-[#f5f5f4] px-3 py-1 rounded-full">
+                        For: {exercise.moodType}
+                    </span>
+                 )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
+}
+
+// Helper for stylized selects
+function SelectFilter({ value, onChange, options }: any) {
+    return (
+        <div className="relative">
+            <select
+                value={value}
+                onChange={onChange}
+                className="appearance-none bg-white border-2 border-[#efeae6] text-[#5c4b43] font-bold text-xs px-4 py-2 pr-8 rounded-full focus:outline-none focus:border-[#e6a394] cursor-pointer"
+            >
+                {options.map((o: any) => (
+                    <option key={o.val} value={o.val}>{o.label}</option>
+                ))}
+            </select>
+            {/* Custom Arrow */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-[#8c7e76]">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+        </div>
+    )
 }

@@ -1,20 +1,32 @@
 import { useState } from 'react';
 
+// Define the shape of the API response
+interface ApiResponse {
+  overallSentiment: number;
+  userMessage: string;
+  // add other fields if needed, like joyScore, etc.
+}
+
+interface AnalysisResult {
+  score: number;
+  mood: string;
+}
+
 export default function MoodCheckIn() {
+  // Explicitly type the state union
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [result, setResult] = useState<{ score: number, mood: string } | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
 
   const handleAnalyze = async () => {
     setStatus('loading');
     try {
-      // Calls your new "Batch Analyze" endpoint
       const res = await fetch('http://localhost:8080/api/mood/analyze-batch', {
         method: 'POST'
       });
       
       if (!res.ok) throw new Error("Analysis failed");
 
-      const data = await res.json();
+      const data: ApiResponse = await res.json();
       
       // Determine mood label based on score
       const moodLabel = data.overallSentiment > 0 ? "Positive 😄" : 
