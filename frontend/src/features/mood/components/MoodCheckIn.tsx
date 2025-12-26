@@ -4,7 +4,6 @@ import { useState } from 'react';
 interface ApiResponse {
   overallSentiment: number;
   userMessage: string;
-  // add other fields if needed, like joyScore, etc.
 }
 
 interface AnalysisResult {
@@ -13,20 +12,33 @@ interface AnalysisResult {
 }
 
 export default function MoodCheckIn() {
-  // Explicitly type the state union
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleAnalyze = async () => {
     setStatus('loading');
+    setErrorMessage('');
+    
     try {
       const res = await fetch('http://localhost:8080/api/mood/analyze-batch', {
         method: 'POST'
       });
       
-      if (!res.ok) throw new Error("Analysis failed");
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
 
-      const data: ApiResponse = await res.json();
+      // FIX: Read as text first to handle empty bodies gracefully
+      const text = await res.text();
+      
+      if (!text) {
+        console.warn("Backend returned empty response");
+        // Handle "No Content" case gracefully
+        setResult({ score: 0, mood: "Neutral (No Data)" });
+        setStatus('success');
+        return;
+      }
+
+      const data: ApiResponse = JSON.parse(text);
       
       // Determine mood label based on score
       const moodLabel = data.overallSentiment > 0 ? "Positive 😄" : 
@@ -34,8 +46,10 @@ export default function MoodCheckIn() {
 
       setResult({ score: data.overallSentiment, mood: moodLabel });
       setStatus('success');
-    } catch (err) {
+
+    } catch (err: any) {
       console.error(err);
+      setErrorMessage(err.message || "Analysis failed");
       setStatus('error');
     }
   };
@@ -48,14 +62,17 @@ export default function MoodCheckIn() {
       </p>
 
       {status === 'idle' || status === 'error' ? (
-        <button 
-          onClick={handleAnalyze}
-          className="bg-white text-purple-600 px-6 py-2 rounded-full font-bold hover:bg-purple-50 transition"
-        >
-          Analyze My Chat
-        </button>
+        <div className="flex flex-col gap-2 items-center">
+            <button 
+            onClick={handleAnalyze}
+            className="bg-white text-purple-600 px-6 py-2 rounded-full font-bold hover:bg-purple-50 transition"
+            >
+            Analyze My Chat
+            </button>
+            {status === 'error' && <span className="text-xs text-red-200 bg-red-900/20 px-2 py-1 rounded">{errorMessage}</span>}
+        </div>
       ) : status === 'loading' ? (
-        <div className="animate-pulse">Thinking... 🧠</div>
+        <div className="animate-pulse font-bold">Thinking... 🧠</div>
       ) : (
         <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
           <p className="text-2xl font-bold">{result?.mood}</p>
