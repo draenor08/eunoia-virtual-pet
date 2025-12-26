@@ -6,8 +6,6 @@ import CopingExercises from "./CopingExercises";
 import PetDashboard from './features/pet/pages/petDashboard';
 import MoodCheckIn from './features/mood/components/MoodCheckIn';
 import MoodChart from './features/mood/components/MoodChart';
-// Import the room (Ensure the path/filename matches your actual file)
-import IsometricRoom from './features/draft/IsometricRoom'; 
 
 const API_URL = "http://localhost:8080";
 const USER_ID = "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3";
@@ -15,7 +13,6 @@ const USER_ID = "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3";
 function App() {
   // Navigation State
   const [activeTab, setActiveTab] = useState<'pet' | 'analytics' | 'profile' | 'coping'>('pet');
-  // New State for Full Screen Focus Mode
   const [isFocusMode, setIsFocusMode] = useState(false);
   
   // User Profile State
@@ -60,14 +57,19 @@ function App() {
     }
   };
 
-  // --- 1. HANDLE FOCUS MODE (FULL SCREEN) ---
+  // --- 1. HANDLE FOCUS MODE (FULL SCREEN IMMERSIVE) ---
   if (isFocusMode) {
     return (
-      <div className="relative w-full h-screen overflow-hidden">
-        {/* The Isometric Room Component */}
-        <IsometricRoom />
+      <div className="relative w-screen h-screen overflow-hidden bg-[#b8e3ea]">
+        {/* Use PetDashboard so logic and chat still work in focus mode */}
+        <PetDashboard 
+          onNavigateToCoping={() => {
+            setIsFocusMode(false);
+            setActiveTab('coping');
+          }}
+        />
 
-        {/* Floating Back Button to return to Dashboard */}
+        {/* Floating Back Button */}
         <button 
           onClick={() => setIsFocusMode(false)}
           className="fixed top-6 left-6 z-50 bg-white/90 text-[#5c4b43] px-6 py-3 rounded-full font-bold shadow-lg border-2 border-[#efeae6] hover:bg-white hover:scale-105 transition flex items-center gap-2"
@@ -78,15 +80,16 @@ function App() {
     );
   }
 
-  // --- 2. NORMAL DASHBOARD ---
+  // --- 2. NORMAL DASHBOARD (FULL SCREEN LAYOUT) ---
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 lg:p-8">
+    // Changed: Removed padding and centering. Now fills screen directly.
+    <div className="w-screen h-screen overflow-hidden bg-white">
       
-      {/* Main Floating Shell */}
-      <div className="w-full max-w-[1400px] min-h-[85vh] bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(92,75,67,0.1)] border-4 border-[#efeae6] flex flex-col md:flex-row overflow-hidden">
+      {/* Changed: Removed max-width, shadows, and borders. Wrapper is now 100% size. */}
+      <div className="w-full h-full flex flex-col md:flex-row overflow-hidden">
         
         {/* SIDEBAR NAVIGATION */}
-        <aside className="w-full md:w-72 bg-[#fdfbf9] border-r-4 border-[#efeae6] flex flex-col p-6 gap-6">
+        <aside className="w-full md:w-72 bg-[#fdfbf9] border-r-4 border-[#efeae6] flex flex-col p-6 gap-6 h-full z-20">
           
           {/* User Profile Snippet */}
           <div className="flex items-center gap-4 p-2">
@@ -112,7 +115,6 @@ function App() {
               label="My Room" 
             />
             
-            {/* --- NEW BUTTON FOR FOCUS MODE --- */}
             <button 
               onClick={() => setIsFocusMode(true)}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 font-bold text-[#8c7e76] hover:bg-indigo-50 hover:text-indigo-600 group"
@@ -120,7 +122,6 @@ function App() {
               <span className="text-xl group-hover:scale-110 transition">🎓</span>
               Focus Room
             </button>
-            {/* --------------------------------- */}
 
             <NavButton 
               active={activeTab === 'coping'} 
@@ -142,18 +143,18 @@ function App() {
             />
           </nav>
 
-          {/* Check In Button - Pushed to bottom */}
+          {/* Check In Button */}
           <div className="mt-auto">
              <MoodCheckIn />
           </div>
         </aside>
 
         {/* MAIN CONTENT AREA */}
-        <main className="flex-1 bg-[#fff] overflow-y-auto h-[85vh] md:h-auto custom-scrollbar relative">
+        <main className="flex-1 bg-[#fff] overflow-y-auto h-full custom-scrollbar relative">
            {/* Decorative Top Blur */}
            <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none"></div>
 
-           <div className="p-2 md:p-8">
+           <div className="p-2 md:p-8 h-full flex flex-col">
             
             {activeTab === 'coping' && (
                <div className="max-w-4xl mx-auto pt-8">
@@ -172,11 +173,13 @@ function App() {
               </div>
             )}
             
+            {/* PET DASHBOARD TAB */}
             {activeTab === 'pet' && (
-                <PetDashboard 
-                // Logic: When chat says "Breathe", switch this tab variable
-                  onNavigateToCoping={() => setActiveTab('coping')} 
+               <div className="h-full w-full"> 
+                  <PetDashboard 
+                    onNavigateToCoping={() => setActiveTab('coping')} 
                   />
+               </div>
             )}
 
             {activeTab === 'profile' && (
@@ -220,8 +223,7 @@ function App() {
   );
 }
 
-// Helper Components with Proper Types
-
+// Helper Components
 interface NavButtonProps {
   active: boolean;
   onClick: () => void;

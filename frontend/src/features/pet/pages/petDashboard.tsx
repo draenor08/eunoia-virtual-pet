@@ -1,48 +1,136 @@
 import { useState } from 'react';
-import PetInteraction from '../components/petInteraction'; // Ensure correct path
-import PetChat from '../components/petChat';               // Ensure correct path
+import IsometricRoom from '../../draft/IsometricRoom';
+import { ROOM_ITEMS, INITIAL_POSITION } from '../../draft/roomConfig';
+import { type Position, type CharacterAction } from '../../draft/types';
 
-export default function PetDashboard() {
-  // Shared state: "What is the pet doing right now?"
-  const [currentAnim, setCurrentAnim] = useState('idle');
+// 1. Define Props so App.tsx can pass the navigation handler
+interface PetDashboardProps {
+  onNavigateToCoping?: () => void; // Optional to prevent breaking if not passed
+}
+
+// Define the API Response structure
+interface AiResponse {
+  reply: string;
+  emotion: string; 
+  action: string;
+  targetObject: string;
+}
+
+export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) {
+  // --- GAME STATE ---
+  const [targetPos, setTargetPos] = useState<Position | null>(INITIAL_POSITION);
+  const [characterAction, setCharacterAction] = useState<CharacterAction>('idle');
+  const [speech, setSpeech] = useState<string>("Hi! I'm ready to listen.");
+  
+  // --- CHAT STATE ---
+  const [inputValue, setInputValue] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
+  
+  // --- LOGIC: MAP API TO WORLD ---
+  const handleApiResponse = (data: AiResponse) => {
+    setSpeech(data.reply);
+
+    if (data.targetObject && data.targetObject !== 'NONE') {
+      const furniture = ROOM_ITEMS.find((i: { type: string; }) => i.type.toUpperCase() === data.targetObject.toUpperCase());
+      if (furniture && furniture.interactionPoint) {
+        setTargetPos(furniture.interactionPoint);
+      }
+    } else {
+      setTargetPos(null); 
+    }
+
+    const actionMap: Record<string, CharacterAction> = {
+      'SLEEP': 'sleeping',
+      'SIT': 'sitting',
+      'DRINK': 'drinking',
+      'BREATHE': 'breathe',
+      'IDLE': 'idle',
+      'HAPPY': 'happy',
+      'SAD': 'sad'
+    };
+    
+    // Check for "BREATHE" command to trigger navigation
+    if (data.action === 'BREATHE' && onNavigateToCoping) {
+         setTimeout(() => onNavigateToCoping(), 2000); // Wait 2s then switch tab
+         setCharacterAction('breathe');
+    } else {
+         const nextAction = actionMap[data.action] || 'idle';
+         setCharacterAction(nextAction);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
+    
+    setIsThinking(true);
+    setSpeech("Thinking..."); 
+    const message = inputValue;
+    setInputValue('');
+
+    try {
+      const res = await fetch('http://localhost:8080/api/chat/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, userId: "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3" }),
+      });
+      
+      if (!res.ok) throw new Error("API Error");
+      
+      const data: AiResponse = await res.json();
+      handleApiResponse(data);
+
+    } catch (e) {
+      setSpeech("I couldn't reach my brain... try again?");
+      setCharacterAction('anxious');
+    } finally {
+      setIsThinking(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#f8f5f2] p-6 font-sans text-[#4a403a]">
-      <header className="mb-8 text-center pt-4">
-        <h1 className="text-4xl font-extrabold tracking-tight text-[#5c4b43] mb-2">
-          Eunoia <span className="text-[#e6a394]">Companion</span>
-        </h1>
-        <p className="text-[#8c7e76] font-medium">Your cozy safe space</p>
-      </header>
+    // 2. CSS FIX: Changed w-screen/h-screen to w-full/h-full so it fits in the card
+    // Added rounded-3xl to match your UI design
+    <div className="relative w-full h-full min-h-[500px] overflow-hidden bg-[#b8e3ea] rounded-3xl">
+      
+      <IsometricRoom 
+        targetPos={targetPos}
+        forcedAction={characterAction}
+        speechText={speech}
+      />
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* LEFT: Pet Area */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-4 border-[#efeae6] relative overflow-hidden">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#fff5f0] rounded-full blur-3xl -z-0"></div>
-            
-            <div className="relative z-10 min-h-[400px] flex items-center justify-center">
-               {/* 1. Pass state down to the visuals */}
-               <PetInteraction 
-                 currentAnimation={currentAnim} 
-                 onManualTrigger={setCurrentAnim} // Allow buttons to update state
-               />
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT: Chat Area */}
-        <div className="lg:col-span-5 h-full">
-            <div className="bg-white rounded-[2rem] shadow-lg border-4 border-[#efeae6] h-full min-h-[600px] overflow-hidden">
-                {/* 2. Chat updates the state when AI responds */}
-                <PetChat 
-                  onAnimationTrigger={(anim) => setCurrentAnim(anim)} 
-                />
-            </div>
-        </div>
-
+      {/* HUD: Buttons */}
+      <div className="absolute top-6 right-6 flex flex-col gap-4 z-50">
+        <button className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-white transition hover:scale-105 group relative">
+          <span className="text-xl">📊</span>
+        </button>
+        <button className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-white transition hover:scale-105 group relative">
+          <span className="text-xl">👤</span>
+        </button>
       </div>
+
+      {/* Chat Interface */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-lg z-50 px-4">
+        <div className={`
+          flex items-center gap-2 bg-white/70 backdrop-blur-lg p-2 rounded-full border border-white/50 shadow-2xl transition-all duration-300
+          ${isThinking ? 'opacity-50 scale-95 pointer-events-none' : 'opacity-100 scale-100'}
+        `}>
+          <input 
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+            placeholder="Type here to talk to me..."
+            className="flex-1 bg-transparent border-none outline-none px-4 py-2 text-gray-800 placeholder-gray-500 font-medium"
+            disabled={isThinking}
+          />
+          <button 
+            onClick={handleSendMessage}
+            className="bg-[#5c4b43] text-white p-3 rounded-full hover:bg-[#4a3b36] transition shadow-md"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }
