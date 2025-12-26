@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-
-const API_URL = "http://localhost:8080";
-const USER_ID = "b564e198-f23b-4286-97b4-986caf2e0883"; // as a string
-
+import { USER_ID, API_URL } from './config'; // as a string
 
 
 function MentalHealthProfile() {
