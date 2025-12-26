@@ -98,16 +98,6 @@ export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) 
         speechText={speech}
       />
 
-      {/* HUD: Buttons */}
-      <div className="absolute top-6 right-6 flex flex-col gap-4 z-50">
-        <button className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-white transition hover:scale-105 group relative">
-          <span className="text-xl">📊</span>
-        </button>
-        <button className="bg-white/80 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-white transition hover:scale-105 group relative">
-          <span className="text-xl">👤</span>
-        </button>
-      </div>
-
       {/* Chat Interface */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-lg z-50 px-4">
         <div className={`
