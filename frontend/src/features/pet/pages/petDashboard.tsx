@@ -2,13 +2,14 @@ import { useState } from 'react';
 import IsometricRoom from '../../draft/IsometricRoom';
 import { ROOM_ITEMS, INITIAL_POSITION } from '../../draft/roomConfig';
 import { type Position, type CharacterAction } from '../../draft/types';
+// 1. IMPORT FROM CONFIG (Standardize the User ID)
+// Path: src/features/pet/pages/ -> ../../../config
+import { USER_ID, API_URL } from '../../../config'; 
 
-// 1. Define Props so App.tsx can pass the navigation handler
 interface PetDashboardProps {
-  onNavigateToCoping?: () => void; // Optional to prevent breaking if not passed
+  onNavigateToCoping?: () => void;
 }
 
-// Define the API Response structure
 interface AiResponse {
   reply: string;
   emotion: string; 
@@ -17,16 +18,13 @@ interface AiResponse {
 }
 
 export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) {
-  // --- GAME STATE ---
   const [targetPos, setTargetPos] = useState<Position | null>(INITIAL_POSITION);
   const [characterAction, setCharacterAction] = useState<CharacterAction>('idle');
   const [speech, setSpeech] = useState<string>("Hi! I'm ready to listen.");
   
-  // --- CHAT STATE ---
   const [inputValue, setInputValue] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   
-  // --- LOGIC: MAP API TO WORLD ---
   const handleApiResponse = (data: AiResponse) => {
     setSpeech(data.reply);
 
@@ -49,9 +47,8 @@ export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) 
       'SAD': 'sad'
     };
     
-    // Check for "BREATHE" command to trigger navigation
     if (data.action === 'BREATHE' && onNavigateToCoping) {
-         setTimeout(() => onNavigateToCoping(), 2000); // Wait 2s then switch tab
+         setTimeout(() => onNavigateToCoping(), 2000);
          setCharacterAction('breathe');
     } else {
          const nextAction = actionMap[data.action] || 'idle';
@@ -68,10 +65,14 @@ export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) 
     setInputValue('');
 
     try {
-      const res = await fetch('http://localhost:8080/api/chat/send', {
+      // 2. USE API_URL AND USER_ID FROM CONFIG
+      const res = await fetch(`${API_URL}/api/chat/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, userId: "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3" }),
+        body: JSON.stringify({ 
+            message, 
+            userId: USER_ID // <--- Uses the shared ID from config.ts
+        }),
       });
       
       if (!res.ok) throw new Error("API Error");
@@ -88,8 +89,6 @@ export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) 
   };
 
   return (
-    // 2. CSS FIX: Changed w-screen/h-screen to w-full/h-full so it fits in the card
-    // Added rounded-3xl to match your UI design
     <div className="relative w-full h-full min-h-[500px] overflow-hidden bg-[#b8e3ea] rounded-3xl">
       
       <IsometricRoom 
@@ -98,7 +97,6 @@ export default function PetDashboard({ onNavigateToCoping }: PetDashboardProps) 
         speechText={speech}
       />
 
-      {/* Chat Interface */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-lg z-50 px-4">
         <div className={`
           flex items-center gap-2 bg-white/70 backdrop-blur-lg p-2 rounded-full border border-white/50 shadow-2xl transition-all duration-300

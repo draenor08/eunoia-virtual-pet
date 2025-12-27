@@ -75,7 +75,7 @@ export default function PetChat({ onAnimationTrigger, userId }: PetChatProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
             message: userText, 
-            userId: userId || "YOUR_COPIED_UUID_HERE" // <--- Paste your UUID if props are empty
+            userId: userId || "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3" // <--- Paste your UUID if props are empty
         }), 
       });
 

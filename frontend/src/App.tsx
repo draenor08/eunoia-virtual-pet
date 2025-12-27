@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import { USER_ID, API_URL } from './config';
 
 // Import your components
 import CopingExercises from "./CopingExercises";
@@ -7,8 +8,6 @@ import PetDashboard from './features/pet/pages/petDashboard';
 import MoodCheckIn from './features/mood/components/MoodCheckIn';
 import MoodChart from './features/mood/components/MoodChart';
 
-const API_URL = "http://localhost:8080";
-const USER_ID = "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3";
 
 function App() {
   // Navigation State

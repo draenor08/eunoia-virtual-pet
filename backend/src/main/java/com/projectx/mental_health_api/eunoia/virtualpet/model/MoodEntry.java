@@ -13,7 +13,7 @@ import lombok.Data;
 @Entity
 @Data // Automatically generates Getters, Setters, and ToString via Lombok
 public class MoodEntry {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +27,7 @@ public class MoodEntry {
     private double sadnessScore;
     private double angerScore;
     private double overallSentiment; // e.g., -1.0 (negative) to 1.0 (positive)
+    private String userId;  // NEW: To associate mood entries with specific users
 
     private LocalDateTime timestamp;
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
+import { USER_ID, API_URL } from '../../../config';
 interface MoodEntry {
   timestamp: string;
   overallSentiment: number;
@@ -11,14 +11,18 @@ interface ChartData {
   score: number;
 }
 
+// 1. ADD: Same User ID
+
 export default function MoodChart() {
   const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/mood/history');
-        if (!res.ok) return; // Silent fail if backend is down
+        // 2. FIX: Add ?userId=... to the URL
+        const res = await fetch(`${API_URL}/api/mood/history?userId=${USER_ID}`);
+        
+        if (!res.ok) return;
         
         const history: MoodEntry[] = await res.json();
         
@@ -38,11 +42,11 @@ export default function MoodChart() {
     return () => clearInterval(interval);
   }, []);
 
-  // FIX: If no data, show a placeholder instead of breaking Recharts
   if (data.length === 0) {
     return (
-        <div className="h-64 w-full mt-4 flex items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 text-sm font-bold">
-            No mood history yet. Start chatting!
+        <div className="h-64 w-full mt-4 flex flex-col gap-2 items-center justify-center bg-[#fdfbf9] rounded-xl border-2 border-dashed border-[#efeae6] text-[#8c7e76] text-sm font-bold">
+            <span>📉 No mood history found</span>
+            <span className="text-xs font-normal opacity-70">Try chatting with your pet first!</span>
         </div>
     );
   }
@@ -51,19 +55,32 @@ export default function MoodChart() {
     <div className="h-64 w-full mt-4">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
-          <XAxis dataKey="time" stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
-          <YAxis domain={[-1, 1]} stroke="#888" fontSize={12} tickLine={false} axisLine={false} />
+          <XAxis 
+            dataKey="time" 
+            stroke="#8c7e76" 
+            fontSize={10} 
+            tickLine={false} 
+            axisLine={false} 
+            interval="preserveStartEnd"
+          />
+          <YAxis 
+            domain={[-1, 1]} 
+            stroke="#8c7e76" 
+            fontSize={10} 
+            tickLine={false} 
+            axisLine={false} 
+          />
           <Tooltip 
-            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} 
+            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', fontFamily: 'Nunito' }} 
             cursor={{ stroke: '#e6a394', strokeWidth: 2 }}
           />
           <Line 
             type="monotone" 
             dataKey="score" 
             stroke="#8b5cf6" 
-            strokeWidth={4} 
-            dot={{ fill: '#8b5cf6', strokeWidth: 0, r: 4 }} 
-            activeDot={{ r: 8 }} 
+            strokeWidth={3} 
+            dot={{ fill: '#8b5cf6', strokeWidth: 0, r: 3 }} 
+            activeDot={{ r: 6 }} 
           />
         </LineChart>
       </ResponsiveContainer>
