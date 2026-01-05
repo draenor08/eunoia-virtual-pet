@@ -1,7 +1,7 @@
 // package com.projectx.mental_health_api.repository;
 
 // public class UserRepository {
-    
+
 // }
 
 // 2nd
@@ -16,7 +16,6 @@
 //     // no code needed; JpaRepository already gives save, findById, findAll, deleteById, etc.
 // }
 
-
 package com.projectx.mental_health_api.repository;
 
 import com.projectx.mental_health_api.model.User;
@@ -24,5 +23,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, UUID> {
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByEmail(String email);
 }

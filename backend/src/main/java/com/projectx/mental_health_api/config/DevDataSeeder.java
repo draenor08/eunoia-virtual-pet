@@ -22,9 +22,9 @@ public class DevDataSeeder implements CommandLineRunner {
             User testUser = new User();
 
             // --- 1. REQUIRED FIELDS (Must be set to avoid crashes) ---
-            testUser.setEmail("test@example.com");       // nullable = false
-            testUser.setUsername("testuser");            // nullable = false
-            testUser.setPasswordHash("dummy-hash-123");  // nullable = false
+            testUser.setEmail("test@example.com"); // nullable = false
+            testUser.setUsername("testuser"); // nullable = false
+            testUser.setPasswordHash("dummy-hash-123"); // nullable = false
 
             // --- 2. OPTIONAL DATA (For your Frontend UI) ---
             testUser.setFirstName("Test");
@@ -42,12 +42,28 @@ public class DevDataSeeder implements CommandLineRunner {
             System.out.println("👤 Test User Created");
             System.out.println("🔑 UUID for App.tsx: " + savedUser.getId());
             System.out.println("=================================================");
-        } else {
-            // If user already exists, just print their ID
+        }
+
+        // Always ensure "Using Phru" exists for testing
+        if (userRepository.findByEmail("using.phru@gmail.com").isEmpty()) {
+            User phru = new User();
+            phru.setEmail("using.phru@gmail.com");
+            phru.setUsername("usingphru");
+            phru.setPasswordHash("1234");
+            phru.setFirstName("Using");
+            phru.setLastName("Phru");
+            phru.setFullName("Using Phru");
+            phru.setIsActive(true);
+            userRepository.save(phru);
+            System.out.println("👤 'Using Phru' User Created");
+        }
+
+        if (userRepository.count() > 0) {
+            // Print info for the first user found (just for log visibility)
             User existing = userRepository.findAll().get(0);
             System.out.println("=================================================");
-            System.out.println("ℹ️ APP RUNNING - EXISTING USER FOUND");
-            System.out.println("🔑 UUID for App.tsx: " + existing.getId());
+            System.out.println("ℹ️ APP RUNNING - USERS EXIST");
+            System.out.println("key UUID for App.tsx (example): " + existing.getId());
             System.out.println("=================================================");
         }
     }

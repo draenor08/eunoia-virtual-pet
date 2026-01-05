@@ -28,12 +28,8 @@ public class ExerciseController {
     public List<Exercise> getExercises(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Integer duration,
-            @RequestParam(required = false, name = "mood") String mood
-    ) {
-        if (category != null) return exerciseRepository.findByCategory(category);
-        if (duration != null) return exerciseRepository.findByDuration(duration);
-        if (mood != null) return exerciseRepository.findByMoodType(mood);
-        return exerciseRepository.findAll();
+            @RequestParam(required = false, name = "mood") String mood) {
+        return exerciseRepository.searchExercises(category, duration, mood);
     }
 
     @GetMapping("/{id}")
@@ -48,10 +44,8 @@ public class ExerciseController {
         if (keyword == null || keyword.isBlank()) {
             return ResponseEntity.badRequest().body("Keyword is required");
         }
-        List<Exercise> results =
-                exerciseRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                        keyword, keyword
-                );
+        List<Exercise> results = exerciseRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                keyword, keyword);
         return ResponseEntity.ok(results);
     }
 

@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +20,7 @@ public class User {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)  // <--- 🟢 ADD THIS LINE
+    @Column(name = "preferences", length = 2000)
     private String preferences;
 
     // ---------- CORE FIELDS ----------
