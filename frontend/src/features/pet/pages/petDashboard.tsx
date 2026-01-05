@@ -16,6 +16,7 @@ interface AiResponse {
   emotion: string;
   action: string;
   targetObject: string;
+  recommendedFilter?: string; // e.g. "breathing", "anxious"
 }
 
 export default function PetDashboard({ userId, onNavigateToCoping }: PetDashboardProps) {
@@ -50,7 +51,6 @@ export default function PetDashboard({ userId, onNavigateToCoping }: PetDashboar
 
     if (data.action === 'BREATHE' && onNavigateToCoping) {
       // INFER context from reply if not provided explicitly
-      // Simple heuristic: check if reply mentions specific keywords
       const replyLower = data.reply.toLowerCase();
       let query = "";
       let category = "all";
@@ -62,6 +62,30 @@ export default function PetDashboard({ userId, onNavigateToCoping }: PetDashboar
 
       setTimeout(() => onNavigateToCoping(query, category), 2000);
       setCharacterAction('breathe');
+
+    } else if (data.recommendedFilter && data.recommendedFilter !== "NONE" && onNavigateToCoping) {
+      // NEW LOGIC: Use explicit recommendation from Backend
+      const filter = data.recommendedFilter.toLowerCase();
+      let category = "all";
+      let query = "";
+
+      // Map backend generic filter to frontend specific params
+      if (["breathing", "grounding", "mindfulness", "relaxation", "cbt", "journaling", "meditation"].includes(filter)) {
+        category = filter;
+      } else if (["anxious", "low", "overwhelmed"].includes(filter)) {
+        // For moods, we might set category to 'all' and query for the mood, 
+        // OR we need to update `onNavigateToCoping` to accept mood.
+        // `App.tsx` handleNavigateToCoping accepts (query, category).
+        // If we pass generic query it works for now as CopingExercises filters by query too.
+        query = filter;
+      }
+
+      setSpeech(data.reply + " (Checking exercises...)");
+      setTimeout(() => onNavigateToCoping(query, category), 6000);
+
+      const nextAction = actionMap[data.action] || 'idle';
+      setCharacterAction(nextAction);
+
     } else {
       const nextAction = actionMap[data.action] || 'idle';
       setCharacterAction(nextAction);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import { USER_ID, API_URL } from './config';
+// import { USER_ID, API_URL } from './config'; // Unused in App.tsx
 
 // Import your components
 import CopingExercises from "./CopingExercises";
@@ -140,7 +140,7 @@ function App() {
             >
               ✕
             </button>
-            <MoodCheckIn />
+            <MoodCheckIn userId={activeUser?.id} />
           </div>
         </div>
       )}
@@ -183,7 +183,7 @@ function App() {
               <h2 className="text-3xl font-extrabold text-[#5c4b43] mb-2">Emotional Trends</h2>
               <p className="text-[#8c7e76] mb-8">Visualizing your journey over time.</p>
               <div className="bg-[#fdfbf9] p-6 rounded-[2rem] border-4 border-[#efeae6]">
-                <MoodChart />
+                <MoodChart userId={activeUser?.id} />
               </div>
             </div>
           </div>

@@ -5,27 +5,63 @@ public class AiResponse {
     private String emotion;
     private String action;
     private String targetObject;
+    private String recommendedFilter; // e.g. "breathing", "relaxation", "anxious"
 
     // Empty constructor for Jackson deserialization
-    public AiResponse() {}
+    public AiResponse() {
+    }
 
-    public AiResponse(String reply, String emotion, String action, String targetObject) {
+    public AiResponse(String reply, String emotion, String action, String targetObject, String recommendedFilter) {
         this.reply = reply;
         this.emotion = emotion;
         this.action = action;
         this.targetObject = targetObject;
+        this.recommendedFilter = recommendedFilter;
+    }
+
+    // Kept for backward compatibility if needed, or just overload
+    public AiResponse(String reply, String emotion, String action, String targetObject) {
+        this(reply, emotion, action, targetObject, null);
     }
 
     // Getters and Setters
-    public String getReply() { return reply; }
-    public void setReply(String reply) { this.reply = reply; }
+    public String getReply() {
+        return reply;
+    }
 
-    public String getEmotion() { return emotion; }
-    public void setEmotion(String emotion) { this.emotion = emotion; }
+    public void setReply(String reply) {
+        this.reply = reply;
+    }
 
-    public String getAction() { return action; }
-    public void setAction(String action) { this.action = action; }
+    public String getEmotion() {
+        return emotion;
+    }
 
-    public String getTargetObject() { return targetObject; }
-    public void setTargetObject(String targetObject) { this.targetObject = targetObject; }
+    public void setEmotion(String emotion) {
+        this.emotion = emotion;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
+
+    public String getTargetObject() {
+        return targetObject;
+    }
+
+    public void setTargetObject(String targetObject) {
+        this.targetObject = targetObject;
+    }
+
+    public String getRecommendedFilter() {
+        return recommendedFilter;
+    }
+
+    public void setRecommendedFilter(String recommendedFilter) {
+        this.recommendedFilter = recommendedFilter;
+    }
 }

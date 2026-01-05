@@ -40,7 +40,7 @@ public class User {
     private String lastName;
 
     @Column(name = "progress")
-    private Integer progress;
+    private String progress;
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
@@ -154,11 +154,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public Integer getProgress() {
+    public String getProgress() {
         return progress;
     }
 
-    public void setProgress(Integer progress) {
+    public void setProgress(String progress) {
         this.progress = progress;
     }
 

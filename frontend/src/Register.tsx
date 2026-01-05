@@ -48,8 +48,8 @@ export default function Register({ onRegisterSuccess, onGoToLogin }: RegisterPro
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-[#b8e3ea] p-4 font-sans">
-            <div className="w-full max-w-[500px] bg-white/90 backdrop-blur-xl rounded-[3rem] p-8 md:p-10 shadow-2xl border-4 border-white relative overflow-hidden">
+        <div className="relative w-screen h-screen overflow-hidden bg-[#b8e3ea] font-sans flex items-center justify-center">
+            <div className="w-full max-w-2xl bg-white/90 backdrop-blur-xl rounded-[3rem] p-8 md:p-12 shadow-2xl border-4 border-white relative overflow-hidden">
 
                 {/* Decorative Blob */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#e6a394] rounded-full mix-blend-multiply filter blur-xl opacity-20 pointer-events-none"></div>

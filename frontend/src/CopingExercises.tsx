@@ -175,6 +175,10 @@ export default function CopingExercises({ userId, initialQuery = "", initialCate
               { id: "breathing", label: "Breathing" },
               { id: "grounding", label: "Grounding" },
               { id: "mindfulness", label: "Mindfulness" },
+              { id: "relaxation", label: "Relaxation" },
+              { id: "cbt", label: "CBT" },
+              { id: "journaling", label: "Journaling" },
+              { id: "meditation", label: "Meditation" },
             ].map((cat) => (
               <button
                 key={cat.id}
