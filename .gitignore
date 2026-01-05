@@ -1,0 +1,4 @@
+backend/*.log
+backend/*.txt
+backend/V1_dump.sql
+backend/uploads/

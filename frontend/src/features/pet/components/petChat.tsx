@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 interface PetChatProps {
   onAnimationTrigger: (anim: string) => void; // Sends string to Dashboard -> Interaction -> Avatar
   userId?: string;
+  onNavigateToExercises?: (category?: string, mood?: string) => void; // New prop for navigation
 }
 
 // 2. Define Backend Response Shape
@@ -11,11 +12,12 @@ interface AiResponse {
   reply: string;
   emotion: string; // Backend sends: "HAPPY", "SAD", "ANXIOUS"
   action: string;  // Backend sends: "BREATHE", "EAT"
+  recommendedFilter?: string; // e.g., "breathing", "anxious"
 }
 
-export default function PetChat({ onAnimationTrigger, userId }: PetChatProps) {
-  const [messages, setMessages] = useState<Array<{text: string, isUser: boolean}>>([
-    { text: "Hello! I'm here to listen.", isUser: false }
+export default function PetChat({ onAnimationTrigger, userId, onNavigateToExercises }: PetChatProps) {
+  const [messages, setMessages] = useState<Array<{ text: string, isUser: boolean }>>([
+    { text: "Hello! I'm Euna, your friend. How are you feeling today?", isUser: false }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +37,7 @@ export default function PetChat({ onAnimationTrigger, userId }: PetChatProps) {
     // 1. Actions (High Priority)
     if (action === 'BREATHE' || text.includes('breathe')) return 'breathIN-OUT';
     if (action === 'EAT' || text.includes('cookie') || text.includes('food')) return 'eat-cookie';
-    
+
     // 2. Emotions
     switch (emotion) {
       case 'HAPPY':
@@ -73,10 +75,10 @@ export default function PetChat({ onAnimationTrigger, userId }: PetChatProps) {
       const response = await fetch('http://localhost:8080/api/chat/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            message: userText, 
-            userId: userId || "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3" // <--- Paste your UUID if props are empty
-        }), 
+        body: JSON.stringify({
+          message: userText,
+          userId: userId || "e9504d60-60e2-4f58-bf6e-bc13ca2adcc3" // <--- Paste your UUID if props are empty
+        }),
       });
 
       if (!response.ok) throw new Error('Backend error');
@@ -90,6 +92,32 @@ export default function PetChat({ onAnimationTrigger, userId }: PetChatProps) {
       const animName = mapBackendToAnimation(data);
       console.log("🤖 AI Triggering Animation:", animName); // Debug log
       onAnimationTrigger(animName);
+
+      // 3. Handle Recommendation
+      if (data.recommendedFilter && data.recommendedFilter !== "NONE" && onNavigateToExercises) {
+        const filter = data.recommendedFilter.toLowerCase();
+
+        // Simple mapping: if AI says "ANXIOUS", maybe filter by mood "anxious" or category "breathing"
+        // The CopingExercises page accepts 'initialCategory' and 'initialMood' logic if we pass it right.
+        // For now, let's pass it as a generic filter.
+
+        setMessages(prev => [...prev, {
+          text: "💡 I found some exercises that might help. Check the 'Coping' tab!",
+          isUser: false
+        }]);
+
+        // Small delay so user sees message
+        setTimeout(() => {
+          // Map standard AI output to our Frontend Categories/Moods
+          if (["breathing", "grounding", "mindfulness", "relaxation"].includes(filter)) {
+            onNavigateToExercises(filter, undefined);
+          } else if (["anxious", "low", "overwhelmed"].includes(filter)) {
+            onNavigateToExercises(undefined, filter);
+          } else {
+            onNavigateToExercises(undefined, undefined); // Default
+          }
+        }, 2000);
+      }
 
     } catch (error) {
       console.error("Chat Error:", error);
@@ -110,8 +138,8 @@ export default function PetChat({ onAnimationTrigger, userId }: PetChatProps) {
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[85%] px-5 py-3 text-sm leading-relaxed rounded-2xl shadow-sm
-              ${msg.isUser 
-                ? 'bg-[#e6a394] text-white rounded-br-none' 
+              ${msg.isUser
+                ? 'bg-[#e6a394] text-white rounded-br-none'
                 : 'bg-[#f3f4f6] text-[#4b5563] rounded-bl-none'
               }`}
             >

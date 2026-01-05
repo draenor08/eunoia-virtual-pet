@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +20,7 @@ public class User {
     @Column(columnDefinition = "uuid")
     private UUID id;
 
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)  // <--- 🟢 ADD THIS LINE
+    @Column(name = "preferences", length = 2000)
     private String preferences;
 
     // ---------- CORE FIELDS ----------
@@ -44,7 +40,7 @@ public class User {
     private String lastName;
 
     @Column(name = "progress")
-    private Integer progress;
+    private String progress;
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
@@ -158,11 +154,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public Integer getProgress() {
+    public String getProgress() {
         return progress;
     }
 
-    public void setProgress(Integer progress) {
+    public void setProgress(String progress) {
         this.progress = progress;
     }
 
